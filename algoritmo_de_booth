@@ -1,0 +1,270 @@
+#####-----Multiplication Booth-----###
+#
+#
+####----Organización de computadores---####
+####----Cristian Durán-------------####
+#
+
+INIT_LOOP:
+Load_count:	MOV ACC, CTE   		#Cargar dirección de count en ACC
+count		   					#Constante count 
+MOV DPTR,ACC   					#Muevo dirección de count a DPTR
+MOV ACC,[DPTR] 					#cargo count en ACC 
+Load_it:	MOV ACC,CTE
+Iterador
+MOV DPTR,ACC
+MOV ACC,[DPTR]
+Loop_test  
+JN         					    #test si (iterador-count)<0
+Init_IF        					#Iterador<count 
+JMP CTE        					#Va a END_LOOP
+END_LOOP
+
+Init_IF:	MOV ACC, CTE   		#Carga dirección de Q en ACC
+Q
+MOV DPTR, ACC  					#Muevo la dirección de Q al DPTR
+MOV ACC,[DPTR] 					#Cargo Q en ACC
+AND ACC, CTE   					#And entre Q y 0001 para verificar el ultimo bit
+0X01
+MOV A, ACC     					#Cargo Q en A
+						
+						
+MOV ACC, CTE   					#Carga dirección de Q_1 en ACC
+Q_1            					#Dirección de Q_1
+MOV DPTR, ACC  					#Muevo la dirección de Q_1 al DPTR
+MOV ACC,[DPTR] 					#Cargo Q_1 en ACC
+AND ACC, CTE   					#And entre Q y 0001 para verificar el ultimo bit
+0X01
+MOV A, ACC 						#Cargo Q en A
+						
+						
+MOV ACC, CTE   					#Carga dirección de Q_1 en ACC
+Q_1            					#Dirección de Q_1
+MOV DPTR, ACC  					#Muevo la dirección de Q_1 al DPTR
+MOV ACC,[DPTR] 					#Cargo Q_1 en ACC
+INV ACC        					#Invierto el ACC
+MOV A, ACC     					#Guado ACC en Q_1
+MOV ACC, CTE   					#Cargo la dirección del número 1
+0X01           					#Número 1
+ADD ACC,A      					#complemento A2 de Q_1	
+MOV A, ACC     					#Cargo -Q_1 en A 
+						
+MOV ACC, CTE   					#Cargo la dirección de Q
+Q              					#Multiplicando Q
+MOV DPTR, ACC  					#Muevo la dirección de Q al DPTR
+MOV ACC, [DPTR]					#Cargo Q en DPTR
+ADD ACC, A     					#ACC=-Q_1+Q
+JZ             					#Test si resultado es 0
+COND1
+MOV ACC, CTE 					#Carga dirección de Q_1 en ACC
+Q_1            					#Dirección de Q_1
+MOV DPTR, ACC  					#Muevo la dirección de Q_1 al DPTR
+MOV ACC,[DPTR] 					#Cargo Q_1 en ACC
+INV ACC        					#Invierto el ACC
+MOV A, ACC     					#Guado ACC en Q_1
+MOV ACC, CTE   					#Cargo la dirección del número 1
+0X01           					#Número 1
+ADD ACC,A      					#complemento A2 de Q_1	
+MOV A, ACC     					#Cargo -Q_1 en A 
+					
+MOV ACC, CTE   					#Cargo la dirección de Q
+Q              					#Constante Q
+MOV DPTR, ACC  					#Muevo la dirección de Q al DPTR
+MOV ACC,[DPTR] 					#Cargo A en ACC
+ADD ACC, A     					#ACC=-Q_1+Q
+JN             					#Test si (A-Q_1<0)
+COND2          					#Q>Q_1
+JMP CTE         
+COND3		   					#Q_1>Q
+COND1:		MOV ACC, CTE
+A
+MOV DPTR, ACC
+MOV ACC,[DPTR]
+MOV A,ACC 
+						
+MOV ACC, CTE
+0X08
+AND ACC, A     					#AND para saber el  primer bit de A
+JZ 
+CASEA_ZERO
+JMP CTE
+CASEA_ONE
+						
+
+COND2:		MOV ACC, CTE   		#Q=1 Q_1=0     A=A-M
+M
+MOV DPTR,  ACC
+MOV ACC, [DPTR]
+INV ACC
+MOV A, ACC
+MOV ACC, CTE
+0X01
+ADD ACC, A
+MOV A, ACC     					#GUARDO -M EN A
+						
+MOV ACC,CTE
+A
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+ADD ACC,A 
+						
+MOV ACC, CTE
+A
+MOV DPTR, ACC
+MOV ACC,[DPTR]
+MOV A,ACC 
+						
+MOV ACC, CTE
+0X08
+AND ACC, A     					#AND para saber el  primer bit de A
+JZ 
+CASEA_ZERO
+JMP CTE
+CASEA_ONE
+						
+						
+JMP CTE        					#Va a Inc_it
+Inc_it
+						
+
+COND3:		MOV ACC, CTE   		#Q=0 Q_1=1     A=A+M
+M
+MOV DPTR,  ACC
+MOV ACC, [DPTR]
+MOV A, ACC    					 #GUARDO -M EN A
+				
+MOV ACC,CTE
+A
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+ADD ACC,A     					#A->A+M	
+
+MOV ACC, CTE
+A
+MOV DPTR, ACC
+MOV ACC,[DPTR]
+MOV A,ACC 
+			
+MOV ACC, CTE
+0X08
+AND ACC, A     					#AND para saber el  primer bit de A
+JZ 
+CASEA_ZERO
+JMP CTE
+CASEA_ONE
+						
+											
+CASEA_ZERO	MOV ACC, CTE
+A
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+DDZ	ACC							#Desplazamiento a la derecha, agrega cero al inicio.
+MOV [DPTR], ACC					#Actualizar el valor de A
+JMP CTE
+Case Q
+					##--------  
+CASEA_UNO	MOV ACC, CTE
+A
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+DDO	ACC							#Desplazamiento a la derecha, agrega uno al inicio.
+MOV [DPTR], ACC					#Actualizar el valor de A
+JMP CTE
+Case Q
+								##--------  
+Case Q:		MOV ACC, CTE
+A
+MOV DPTR, ACC
+MOV ACC,[DPTR]
+MOV A,ACC 
+					
+MOV ACC, CTE
+0X01	
+AND ACC, A      				#AND para saber el ultimo bit de A
+JZ
+CASEQ_ZERO
+JMP  CTE
+CASEQ_ONE
+CASEQ_ZERO	MOV ACC, CTE
+Q
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+DDZ	ACC							#Desplazamiento a la derecha, agrega cero al inicio.
+MOV [DPTR], ACC					#Actualizar el valor de Q
+JMP CTE
+CASEQ-1  				##--------  
+CASEQ_ONE	MOV ACC, CTE
+Q
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+DDO	ACC							#Desplazamiento a la derecha, agrega uno al inicio.
+MOV [DPTR], ACC					#Act
+JMP CTE
+CASEQ-1
+CASEQ-1:	MOV ACC, CTE
+Q
+MOV DPTR, ACC
+MOV ACC,[DPTR]
+MOV A,ACC 
+						
+MOV ACC, CTE
+0X01	
+AND ACC, A      				#AND para saber el ultimo bit de Q
+JZ
+CASEQ-1_ZERO
+JMP  CTE
+CASEQ-1_ONE
+CASEQ_ZERO	MOV ACC, CTE
+Q-1
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+MOV	ACC, CTE
+DDZ ACC							#Desplazamiento a la derecha, agrega cero al inicio.
+MOV [DPTR], ACC					#Actualizar el valor de Q
+								##--------  
+CASEQ_ONE	MOV ACC, CTE
+Q-1
+MOV DPTR, ACC
+MOV ACC, [DPTR]
+MOV	ACC,CTE
+DDO	ACC											#Desplazamiento a la derecha, agrega uno al inicio.
+MOV [DPTR], ACC		
+						
+						
+JMP CTE        #Va a Inc_it
+Inc_it
+						
+JMP CTE        #Va a Inc_it
+Inc_it
+						
+Inc_it		MOV ACC, CTE   						#Cargar dirección de itereador en ACC
+iterador
+MOV DPTR, ACC  									#Mueve la dirección de iterador a DPTR
+MOV [DPTR], ACC
+MOV A, ACC										#Carga i en el registro COND2
+MOV ACC, CTE   									#Carga constante+1 en iterador
+0x01
+ADD ACC,A      									#ACC=i+1
+MOV [DPTR],ACC 									#Guardo el nuevo valor del iterador
+goto_init:	JMP CTE        						#Vuelve al inicio del loop
+INIT_LOOP
+END_LOOP:
+			
+MOV ACC, CTE
+
+MOV DPTR, ACC
+MOV [DPTR], ACC
+MOV ACC, CTE
+HALT ACC
+			
+CON:
+Iterator      0x00			
+A_M:          0X00
+Q:            0x03    
+Q_1:          0x00
+Q_0:		  0x00
+M:            0x07
+COUNT:        0x04
+			
+	
+		
